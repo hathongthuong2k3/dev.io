@@ -7,7 +7,7 @@ import {
     getTagDetails,
     getPopularTags,
 } from "../controllers/tag.controller.js";
-import protectRoute from "../middlewares/protectRoute.js";
+import { protectRoute } from "../middlewares/auth.middleware.js";
 
 const router = express.Router();
 

@@ -8,7 +8,7 @@ import authRoutes from "./routes/auth.route.js";
 import userRoutes from "./routes/user.route.js";
 import postRoutes from "./routes/post.route.js";
 import tagRoutes from "./routes/tag.route.js";
-import readingListRoutes from "./routes/readingList.routes.js";
+import readingListRoutes from "./routes/readingList.route.js";
 import notificationRoutes from "./routes/notification.route.js";
 import connectionRoutes from "./routes/connection.route.js";
 
