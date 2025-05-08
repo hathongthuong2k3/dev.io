@@ -15,10 +15,7 @@ const postSchema = new mongoose.Schema(
                 ref: "Tag",
             },
         ],
-        savedCount: {
-            type: Number,
-            default: 0,
-        },
+        savedUsers: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
         likes: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
         comments: [
             {

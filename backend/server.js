@@ -36,7 +36,7 @@ app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/users", userRoutes);
 app.use("/api/v1/posts", postRoutes);
 app.use("/api/v1/tags", tagRoutes);
-app.use("/api/reading-list", readingListRoutes);
+app.use("/api/v1/reading-list", readingListRoutes);
 app.use("/api/v1/notifications", notificationRoutes);
 app.use("/api/v1/connections", connectionRoutes);
 

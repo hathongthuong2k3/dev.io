@@ -8,33 +8,17 @@ const tagSchema = new mongoose.Schema(
             unique: true,
             trim: true,
             lowercase: true,
-            maxlength: 30,
+            maxLength: 30,
         },
         description: {
             type: String,
             default: "",
-            maxlength: 200,
+            maxLength: 200,
         },
-        followers: [
-            {
-                type: mongoose.Schema.Types.ObjectId,
-                ref: "User",
-            },
-        ],
-        posts: [
-            {
-                type: mongoose.Schema.Types.ObjectId,
-                ref: "Post",
-            },
-        ],
-        postCount: {
-            type: Number,
-            default: 0,
-        },
-        followerCount: {
-            type: Number,
-            default: 0,
-        },
+        followers: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
+        posts: [{ type: mongoose.Schema.Types.ObjectId, ref: "Post" }],
+        postCount: [{ type: mongoose.Schema.Types.ObjectId, ref: "Post" }],
+        followerCount: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
     },
     { timestamps: true }
 );
