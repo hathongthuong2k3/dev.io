@@ -1,9 +1,9 @@
 import express from "express";
 import {
-    addToReadingList,
-    removeFromReadingList,
-    updateReadingStatus,
-    getReadingList,
+    postAddToReadingList,
+    postRemoveFromReadingList,
+    postUpdateReadingStatus,
+    getReadingListByUser,
 } from "../controllers/readingList.controller.js";
 import { protectRoute } from "../middlewares/auth.middleware.js";
 
@@ -11,9 +11,9 @@ const router = express.Router();
 
 router.use(protectRoute);
 
-router.post("/:postId", addToReadingList);
-router.delete("/:postId", removeFromReadingList);
-router.patch("/:postId/status", updateReadingStatus);
-router.get("/", getReadingList);
+router.get("/", getReadingListByUser);
+router.post("/:postId", postAddToReadingList);
+router.delete("/:postId", postRemoveFromReadingList);
+router.patch("/status/:postId", postUpdateReadingStatus);
 
 export default router;

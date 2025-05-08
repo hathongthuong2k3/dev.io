@@ -20,6 +20,20 @@ export const getFeedPosts = async (req, res) => {
     }
 };
 
+export const getPostById = async (req, res) => {
+    try {
+        const postId = req.params.id;
+        const post = await Post.findById(postId)
+            .populate("author", "name username profilePicture headline")
+            .populate("comments.user", "name profilePicture username headline");
+
+        res.status(200).json(post);
+    } catch (error) {
+        console.error("Error in getPostById controller:", error);
+        res.status(500).json({ message: "Server error" });
+    }
+};
+
 export const getPostsByTag = async (req, res) => {
     try {
         const tagId = req.params.id;
@@ -45,7 +59,6 @@ export const getPostsByUser = async (req, res) => {
 export const getSavedUsers = async (req, res) => {
     try {
         const postId = req.params.id;
-        const post = await Post.findById(postId);
         const savedUsers = await User.find({ savedPosts: postId });
         res.status(200).json(savedUsers);
     } catch (error) {
@@ -135,20 +148,6 @@ export const deletePost = async (req, res) => {
         res.status(200).json({ message: "Post deleted successfully" });
     } catch (error) {
         console.log("Error in delete post controller", error.message);
-        res.status(500).json({ message: "Server error" });
-    }
-};
-
-export const getPostById = async (req, res) => {
-    try {
-        const postId = req.params.id;
-        const post = await Post.findById(postId)
-            .populate("author", "name username profilePicture headline")
-            .populate("comments.user", "name profilePicture username headline");
-
-        res.status(200).json(post);
-    } catch (error) {
-        console.error("Error in getPostById controller:", error);
         res.status(500).json({ message: "Server error" });
     }
 };
