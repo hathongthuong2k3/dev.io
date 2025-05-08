@@ -1,5 +1,6 @@
 import cloudinary from "../lib/cloudinary.js";
 import Post from "../models/post.model.js";
+import Tag from "../models/tag.model.js";
 import Notification from "../models/notification.model.js";
 import { sendCommentNotificationEmail } from "../emails/emailHandlers.js";
 
@@ -19,51 +20,85 @@ export const getFeedPosts = async (req, res) => {
     }
 };
 
+export const getPostsByTag = async (req, res) => {
+    try {
+        const tagId = req.params.id;
+        const posts = await Post.find({ tags: tagId });
+        res.status(200).json(posts);
+    } catch (error) {
+        console.error("Error in getPostsByTag controller:", error);
+        res.status(500).json({ message: "Server error" });
+    }
+};
+
+export const getPostsByUser = async (req, res) => {
+    try {
+        const userId = req.params.id;
+        const posts = await Post.find({ author: userId });
+        res.status(200).json(posts);
+    } catch (error) {
+        console.error("Error in getPostsByUser controller:", error);
+        res.status(500).json({ message: "Server error" });
+    }
+};
+
+export const getSavedUsers = async (req, res) => {
+    try {
+        const postId = req.params.id;
+        const post = await Post.findById(postId);
+        const savedUsers = await User.find({ savedPosts: postId });
+        res.status(200).json(savedUsers);
+    } catch (error) {
+        console.error("Error in getSavedUsers controller:", error);
+        res.status(500).json({ message: "Server error" });
+    }
+};
+
+export const getSavedPostsForUser = async (req, res) => {
+    try {
+        const userId = req.params.id;
+        const savedPosts = await Post.find({ savedUsers: userId });
+        res.status(200).json(savedPosts);
+    } catch (error) {
+        console.error("Error in getSavedPosts controller:", error);
+        res.status(500).json({ message: "Server error" });
+    }
+};
+
 export const createPost = async (req, res) => {
     try {
         const { content, image, tags: tagNames } = req.body;
+        const userId = req.user._id;
 
-        // Xử lý tags nếu có
-        let tagIds = [];
+        const post = new Post({
+            author: userId,
+            content,
+        });
+        await post.save();
+
         if (tagNames && tagNames.length > 0) {
-            const tags = await getOrCreateTags(tagNames);
-            tagIds = tags.map((tag) => tag._id);
+            const tags = await Tag.find({ name: { $in: tagNames } });
 
-            // Cập nhật postCount cho các tag
-            await Tag.updateMany(
-                { _id: { $in: tagIds } },
-                { $inc: { postCount: 1 } }
-            );
+            // update post tags
+            post.tags = tags.map((tag) => tag._id);
+            await post.save();
+
+            // update tag posts and postCount
+            tags.forEach(async (tag) => {
+                tag.posts.push(post._id);
+                tag.postCount++;
+                await tag.save();
+            });
         }
 
-        let newPost;
+        // save image to cloudinary
         if (image) {
             const imgResult = await cloudinary.uploader.upload(image);
-            newPost = new Post({
-                author: req.user._id,
-                content,
-                image: imgResult.secure_url,
-                tags: tagIds,
-            });
-        } else {
-            newPost = new Post({
-                author: req.user._id,
-                content,
-                tags: tagIds,
-            });
+            post.image = imgResult.secure_url;
+            await post.save();
         }
 
-        await newPost.save();
-
-        // Cập nhật tag với post mới
-        if (tagIds.length > 0) {
-            await Tag.updateMany(
-                { _id: { $in: tagIds } },
-                { $addToSet: { posts: newPost._id } }
-            );
-        }
-
-        res.status(201).json(newPost);
+        res.status(201).json(post);
     } catch (error) {
         console.error("Error in createPost controller:", error);
         res.status(500).json({ message: "Server error" });
@@ -83,11 +118,9 @@ export const deletePost = async (req, res) => {
 
         // check if the current user is the author of the post
         if (post.author.toString() !== userId.toString()) {
-            return res
-                .status(403)
-                .json({
-                    message: "You are not authorized to delete this post",
-                });
+            return res.status(403).json({
+                message: "You are not authorized to delete this post",
+            });
         }
 
         // delete the image from cloudinary as well!
@@ -200,6 +233,39 @@ export const likePost = async (req, res) => {
         res.status(200).json(post);
     } catch (error) {
         console.error("Error in likePost controller:", error);
+        res.status(500).json({ message: "Server error" });
+    }
+};
+
+export const updatePost = async (req, res) => {
+    try {
+        const postId = req.params.id;
+        const { content, image, tags } = req.body;
+
+        const post = await Post.findById(postId);
+
+        if (!post) {
+            return res.status(404).json({ message: "Post not found" });
+        }
+
+        if (post.author.toString() !== req.user._id.toString()) {
+            return res.status(403).json({ message: "Unauthorized" });
+        }
+
+        if (image) {
+            await cloudinary.uploader.destroy(
+                post.image.split("/").pop().split(".")[0]
+            );
+
+            const imgResult = await cloudinary.uploader.upload(image);
+            post.image = imgResult.secure_url;
+        }
+
+        await Post.findByIdAndUpdate(postId, { content, image, tags });
+
+        res.status(200).json({ message: "Post updated" });
+    } catch (error) {
+        console.error("Error in updatePost controller:", error);
         res.status(500).json({ message: "Server error" });
     }
 };

@@ -17,8 +17,14 @@ const tagSchema = new mongoose.Schema(
         },
         followers: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
         posts: [{ type: mongoose.Schema.Types.ObjectId, ref: "Post" }],
-        postCount: [{ type: mongoose.Schema.Types.ObjectId, ref: "Post" }],
-        followerCount: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
+        followerCount: {
+            type: Number,
+            default: 0,
+        },
+        postCount: {
+            type: Number,
+            default: 0,
+        },
     },
     { timestamps: true }
 );

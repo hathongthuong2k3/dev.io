@@ -71,6 +71,7 @@ const userSchema = new mongoose.Schema(
             },
         ],
         posts: [{ type: mongoose.Schema.Types.ObjectId, ref: "Post" }],
+        followedTags: [{ type: mongoose.Schema.Types.ObjectId, ref: "Tag" }],
     },
     { timestamps: true }
 );

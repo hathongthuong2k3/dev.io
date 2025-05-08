@@ -202,6 +202,16 @@ export const postUpdateReadingStatus = async (req, res) => {
     try {
         const { postId } = req.params;
         const userId = req.user._id;
+        const { status } = req.body;
+
+        // Check if status is not allowed
+        if (
+            status != "unread" &&
+            status != "reading" &&
+            status != "completed"
+        ) {
+            return res.status(400).json({ message: "Invalid status" });
+        }
 
         // Check if post exists
         const post = await Post.findById(postId);
@@ -223,7 +233,7 @@ export const postUpdateReadingStatus = async (req, res) => {
         // Update reading status
         const updatedReadingList = user.readingList.map((item) => {
             if (item.post.toString() === postId) {
-                return { ...item, status: req.body.status };
+                return { ...item, status };
             }
             return item;
         });
@@ -253,6 +263,15 @@ export const postUpdatePost = async (req, res) => {
         // Check if user is the owner of the post
         if (post.author.toString() !== userId) {
             return res.status(403).json({ message: "Unauthorized" });
+        }
+
+        if (image) {
+            await cloudinary.uploader.destroy(
+                post.image.split("/").pop().split(".")[0]
+            );
+
+            const imgResult = await cloudinary.uploader.upload(image);
+            post.image = imgResult.secure_url;
         }
 
         // Update post
