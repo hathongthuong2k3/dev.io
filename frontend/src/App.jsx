@@ -11,6 +11,9 @@ import NotificationsPage from "./pages/NotificationsPage";
 import NetworkPage from "./pages/NetworkPage";
 import PostPage from "./pages/PostPage";
 import ProfilePage from "./pages/ProfilePage";
+import TagsPage from "./pages/TagsPage";
+import TagPage from "./pages/TagPage";
+import ReadingListPage from "./pages/ReadingListPage";
 
 function App() {
 	const { data: authUser, isLoading } = useQuery({
@@ -40,6 +43,9 @@ function App() {
 				<Route path='/network' element={authUser ? <NetworkPage /> : <Navigate to={"/login"} />} />
 				<Route path='/post/:postId' element={authUser ? <PostPage /> : <Navigate to={"/login"} />} />
 				<Route path='/profile/:username' element={authUser ? <ProfilePage /> : <Navigate to={"/login"} />} />
+				<Route path='/tags' element={authUser ? <TagsPage /> : <Navigate to={"/login"} />} />
+				<Route path='/tags/:tagId' element={authUser ? <TagPage /> : <Navigate to={"/login"} />} />
+				<Route path='/reading-list' element={authUser ? <ReadingListPage /> : <Navigate to={'/login'} />} />
 			</Routes>
 			<Toaster />
 		</Layout>
